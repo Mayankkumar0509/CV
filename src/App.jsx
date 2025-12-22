@@ -113,7 +113,7 @@ export default function App() {
       title: "LLM GitHub Pages Deployment System",
       desc: "FastAPI + Gemini LLM automated deployment system.",
       details: "Automates repo creation, updates, and GitHub Pages activation.",
-      link: "https://github.com/Mayankkumar0509/TDS_Project1",
+      link: "https://github.com/Mayankkumar0509/llm-deploy-platform",
     },
     {
       title: "Quiz Master V2",
