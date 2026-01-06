@@ -34,6 +34,15 @@ export default function App() {
     evaluation_url: "",
   });
 
+  const [predicting, setPredicting] = useState(false);
+  const [predictResp, setPredictResp] = useState(null);
+  const [predictForm, setPredictForm] = useState({
+    amount_due: 30000,
+    days_overdue: 30,
+    customer_risk_score: 0.2,
+    past_recovery_rate: 0.7,
+  });
+
   const apiEndpoint = "https://llm-deploy-platform.onrender.com/api-endpoint";
 
   // Auto Dark Mode Detection (system preference)
@@ -107,27 +116,56 @@ export default function App() {
     }
   }
 
+  // Prediction API call for AI Debt Collection
+  async function handlePredict(e) {
+    e.preventDefault();
+    setPredicting(true);
+    setPredictResp(null);
+    try {
+      const res = await fetch("https://fedex-dca-ai-hub.onrender.com/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(predictForm),
+      });
+
+      const data = await res.json().catch(() => ({ status: res.status }));
+      setPredictResp({ ok: res.ok, status: res.status, body: data });
+    } catch (err) {
+      setPredictResp({ ok: false, error: String(err) });
+    } finally {
+      setPredicting(false);
+    }
+  }
+
   // Project list
   const projects = [
-    {
-      title: "LLM GitHub Pages Deployment System",
-      desc: "FastAPI + Gemini LLM automated deployment system.",
-      details: "Automates repo creation, updates, and GitHub Pages activation.",
-      link: "https://github.com/Mayankkumar0509/llm-deploy-platform",
-    },
-    {
-      title: "Quiz Master V2",
-      desc: "Full system with Flask + Redis + Celery + Vue.js.",
-      details: "Admin dashboard, user quizzes, CSV export, email reports.",
-      link: "https://github.com/Mayankkumar0509/MAD-2-Quiz-Master---V2",
-    },
-    {
-      title: "Quiz Master V1",
-      desc: "Flask-based multi-user quiz management.",
-      details: "Admin CRUD, quizzes, chapters, and score tracking.",
-      link: "https://github.com/Mayankkumar0509/MAD-I-Quiz-Master---V1",
-    },
-  ];
+      {
+        title: "FedEx SMART Hackathon – AI Debt Collection Assistant",
+        desc: "End-to-end AI system for debt collection prioritization (sole participant).",
+        details:
+          "Designed and implemented ML-based recovery probability scoring, priority ranking logic, REST APIs, and deployed a complete frontend-backend system.",
+        link: "https://github.com/Mayankkumar0509/fedex-dca-ai-hub",
+      },
+      {
+        title: "LLM GitHub Pages Deployment System",
+        desc: "FastAPI + Gemini LLM automated deployment system.",
+        details:
+          "Automates repo creation, updates, and GitHub Pages activation using async tasks and retry mechanisms.",
+        link: "https://github.com/Mayankkumar0509/llm-deploy-platform",
+      },
+      {
+        title: "Quiz Master V2",
+        desc: "Full system with Flask + Redis + Celery + Vue.js.",
+        details: "Admin dashboard, quizzes, CSV export, and email reports.",
+        link: "https://github.com/Mayankkumar0509/MAD-2-Quiz-Master---V2",
+      },
+      {
+        title: "Quiz Master V1",
+        desc: "Flask-based multi-user quiz management system.",
+        details: "Admin CRUD, quizzes, chapters, and score tracking.",
+        link: "https://github.com/Mayankkumar0509/MAD-I-Quiz-Master---V1",
+      },
+    ];
 
   // Skills groups
   const skillsGroups = [
@@ -185,8 +223,10 @@ export default function App() {
                   <nav className="hidden md:block text-sm">
                     <a href="#about" className="mr-4">About</a>
                     <a href="#projects" className="mr-4">Projects</a>
+                    <a href="#debt-demo" className="mr-4">AI Debt Demo</a>
                     <a href="#deploy" className="mr-4">LLM Demo</a>
                     <a href="#skills" className="mr-4">Skills</a>
+                    <a href="#certifications" className="mr-4">Certifications</a>
                     <a href="#contact" className="mr-4">Contact</a>
                   </nav>
                   <button onClick={() => setDark(!dark)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">
@@ -204,13 +244,13 @@ export default function App() {
                     <h2 className="text-3xl font-bold">Hi — I’m Mayank</h2>
                     <p className="mt-3 text-gray-600 dark:text-gray-300">BS Data Science student at IIT Madras. I build full-stack applications, LLM automation pipelines, and quiz platforms.</p>
                     <div className="mt-4 space-x-3">
-                      <a href="/Mayank_Kumar_Resume.pdf" download className="px-4 py-2 bg-blue-600 text-white rounded">Download CV</a>
+                      <a href="Mayank_Kumar_Resume.pdf" download className="px-4 py-2 bg-blue-600 text-white rounded">Download CV</a>
                       <a href="https://github.com/Mayankkumar0509" target="_blank" rel="noreferrer" className="px-4 py-2 border rounded">GitHub</a>
                     </div>
                   </div>
 
                   <div className="mt-6 md:mt-0 flex-shrink-0">
-                    <img src="/Mayank.jpg" alt="Mayank" className="w-36 h-48 object-cover rounded-lg shadow-md" />
+                    <img src="Mayank.jpg" alt="Mayank" className="w-36 h-48 object-cover rounded-lg shadow-md" />
                   </div>
                 </div>
               </motion.div>
@@ -256,6 +296,28 @@ export default function App() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* AI DEBT COLLECTION DEMO */}
+            <section className="max-w-5xl mx-auto px-6 mt-10" id="debt-demo">
+              <h3 className="text-2xl font-semibold">AI Debt Collection Demo</h3>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">Test the AI model for debt recovery probability prediction from the FedEx SMART Hackathon project.</p>
+
+              <form onSubmit={handlePredict} className="mt-4 grid gap-3 md:grid-cols-2">
+                <input type="number" className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700" placeholder="Amount Due" value={predictForm.amount_due} onChange={e => setPredictForm({...predictForm, amount_due: Number(e.target.value)})} />
+                <input type="number" className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700" placeholder="Days Overdue" value={predictForm.days_overdue} onChange={e => setPredictForm({...predictForm, days_overdue: Number(e.target.value)})} />
+                <input type="number" step="0.01" className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700" placeholder="Customer Risk Score" value={predictForm.customer_risk_score} onChange={e => setPredictForm({...predictForm, customer_risk_score: Number(e.target.value)})} />
+                <input type="number" step="0.01" className="p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-700" placeholder="Past Recovery Rate" value={predictForm.past_recovery_rate} onChange={e => setPredictForm({...predictForm, past_recovery_rate: Number(e.target.value)})} />
+
+                <div className="md:col-span-2 flex items-center gap-3">
+                  <button type="submit" disabled={predicting} className="px-4 py-2 bg-green-600 text-white rounded">{predicting ? 'Predicting...' : 'Predict Recovery'}</button>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Endpoint: <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">https://fedex-dca-ai-hub.onrender.com/predict</code></div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs text-gray-700 dark:text-gray-200">{predictResp ? JSON.stringify(predictResp, null, 2) : 'Prediction response will appear here'}</pre>
+                </div>
+              </form>
+            </section>
 
             {/* LLM DEPLOY DEMO */}
             <section className="max-w-5xl mx-auto px-6 mt-10" id="deploy">
@@ -304,6 +366,32 @@ export default function App() {
               </div>
             </section>
 
+            {/* CERTIFICATIONS */}
+          <section className="max-w-5xl mx-auto px-6 mt-12" id="certifications">
+            <h3 className="text-2xl font-semibold mb-4">Certifications & Workshops</h3>
+
+            <div className="p-4 bg-white dark:bg-gray-800 rounded shadow">
+              <h4 className="font-semibold text-blue-600 dark:text-blue-400">
+                Applied Vibe Coding Workshop
+              </h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                Centre for Outreach and Digital Education, IIT Madras<br />
+                Conducted by Mr. Anand (Co-founder, Gramener)<br />
+                Completed on 15 November 2025
+              </p>
+
+              <a
+                href="https://drive.google.com/file/d/1MrqdiX1Sl7fLZJpGClISi7h0UDH_GlOz/view"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block mt-2 text-sm text-blue-600 hover:underline"
+              >
+                View Certificate
+              </a>
+            </div>
+          </section>
+
+
             {/* CONTACT */}
             <section className="max-w-5xl mx-auto px-6 mt-12 mb-20" id="contact">
               <h3 className="text-2xl font-semibold">Contact</h3>
@@ -318,10 +406,12 @@ export default function App() {
             <a
               href="https://mail.google.com/mail/?view=cm&fs=1&to=23f1003168@ds.study.iitm.ac.in"
               target="_blank"
-              class="fixed right-6 bottom-6 bg-blue-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg"
+              rel="noreferrer"
+              className="fixed right-6 bottom-6 bg-blue-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg"
             >
               ✉️
             </a>
+
 
             {/* FOOTER */}
             <footer className="bg-white dark:bg-gray-800 border-t py-4">
